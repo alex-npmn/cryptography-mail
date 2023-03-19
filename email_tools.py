@@ -12,6 +12,8 @@ from cryptography.hazmat.backends import default_backend
 import hashlib
 import base64
 
+from flask import session
+
 def send_signed_email(from_email, to_email, subject, message, private_key_path):
     msg = MIMEMultipart()
     msg['From'] = from_email
