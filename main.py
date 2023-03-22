@@ -10,7 +10,7 @@ private_key_path = 'private_key.pem'
 public_key_path = 'public_key.pem'
 
 # Sending signed email
-send_signed_email(email_address, password, to_email, subject, message, private_key_path)
+send_signed_email(email_address, to_email, subject, message, private_key_path)
 
 # Retrieving emails and verifying signatures
 retrieve_emails(email_address, password, public_key_path)

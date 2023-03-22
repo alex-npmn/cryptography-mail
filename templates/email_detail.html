@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ email['subject'] }}</h1>
+    <p>From: {{ email['from'] }}</p>
+    <hr>
+    <pre>{{ email.get_payload() }}</pre>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="public_key" class="form-label">Public Key</label>
+            <input type="file" class="form-control" id="public_key" name="public_key" accept=".pem">
+        </div>
+        <button type="submit" class="btn btn-primary">Verify Email</button>
+    </form>
+
+    {% if is_verified is not none %}
+        <hr>
+        {% if is_verified %}
+            <div class="alert alert-success" role="alert">
+                The email signature is valid.
+            </div>
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+                The email signature is invalid.
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

@@ -1,16 +1,17 @@
-import os
-import requests
-import json
 import base64
+import json
+import os
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-from flask import session
-from cryptography.hazmat.primitives import serialization
+import requests
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
+from flask import session
+
 from auth import dict_to_creds
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -80,4 +81,3 @@ def send_encrypted_signed_email(from_email, to_email, subject, message, private_
             print(f"Failed to send email: {response.text}")
     except Exception as e:
         print("Failed to send email:", str(e))
-
