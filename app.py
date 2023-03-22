@@ -1,5 +1,5 @@
 import google.oauth2.credentials
-from flask import Flask, session, jsonify
+from flask import Flask, session, jsonify, flash
 from flask import request, redirect, url_for
 import os
 from auth import get_google_auth_flow, oauth2callback, logout
@@ -78,7 +78,7 @@ def generate_keys():
     os.remove('private_key.pem')
     os.remove('public_key.pem')
 
-    return send_file(zip_buffer, as_attachment=True, attachment_filename='keys.zip', mimetype='application/zip', cache_timeout=0)
+    return send_file(zip_buffer, as_attachment=True, download_name='keys.zip', mimetype='application/zip')
 
 from flask import render_template
 
@@ -147,6 +147,8 @@ def handle_send_signed_email():
     # Remove the temporary private and public key files after sending the email
     os.remove(private_key_path)
     os.remove(public_key_path)
+
+    flash("Your email has been sent and signed successfully", "success")
 
     return redirect(url_for("send_email"))
 
