@@ -1,8 +1,7 @@
-import os
-
 import google.oauth2.credentials
 from flask import Flask, session, jsonify
-
+from flask import request, redirect, url_for
+import os
 from auth import get_google_auth_flow, oauth2callback, logout
 from flask_session import Session
 from send_email import send_encrypted_signed_email
@@ -205,13 +204,10 @@ def verify_email_signature_by_id(email_id, attachment_id):
 def download_attachment(email_id, attachment_id):
     attachment_file, attachment_filename = download_attachment_file(email_id, attachment_id)
 
-    if attachment_file is None or attachment_filename is None:
+    if attachment_file is None:
         return "Error downloading attachment", 400
 
-    return send_file(attachment_file, attachment_filename=attachment_filename, as_attachment=True)
-
-from flask import request, redirect, url_for
-import os
+    return send_file(attachment_file, download_name="test", as_attachment=True)
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 

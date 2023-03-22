@@ -265,7 +265,9 @@ def get_email(email_id):
         print(f"An error occurred: {error}")
         return None
 
+
 def download_attachment_file(email_id, attachment_id):
+    print(f"download_attachment_file called with email_id: {email_id}, attachment_id: {attachment_id}")
     if 'credentials' not in session:
         return redirect('authorize')
 
@@ -278,30 +280,29 @@ def download_attachment_file(email_id, attachment_id):
             id=email_id
         ).execute()
 
-        attachment_filename = None
-        for part in message['payload'].get('parts', []):
+        # attachment_filename = None
+        for part in message['payload']['parts']:
+            print(f"Checking part: {part}")
             if part.get('filename') and part['body'].get('attachmentId') == attachment_id:
                 attachment_filename = part['filename']
-                file_size = part['body']['size']
-                break
 
-        if attachment_filename is None:
-            return None, None
+                # Retrieve attachment using Gmail API
+                attachment = service.users().messages().attachments().get(
+                    userId='me', messageId=email_id, id=attachment_id).execute()
 
-        attachment = service.users().messages().attachments().get(
-            userId='me', messageId=email_id, id=attachment_id).execute()
+                attachment_data = attachment.get('data')
+                if attachment_data is None:
+                    print("Attachment data not found")
+                    return None, None
 
-        attachment_data = attachment.get('data')
-        if attachment_data is None:
-            return None, None
+                attachment_file = base64.urlsafe_b64decode(attachment_data.encode('UTF-8'))
 
-        file_data = base64.urlsafe_b64decode(attachment_data.encode('UTF-8'))
+                print(f"Found attachment: {attachment_filename}, {attachment_file}")
+                return attachment_file, attachment_filename
 
-        output = io.BytesIO()
-        output.write(file_data)
-        output.seek(0)
-
-        return output, attachment_filename
+        # if attachment_filename is None:
+        #     print("Attachment filename not found")
+        #     return attachment_file, None
 
     except HttpError as error:
         print(f'An error occurred: {error}')
