@@ -11,7 +11,6 @@
 {% for message in get_flashed_messages(with_categories=true) %}
     <div class="alert alert-{{ message[0] }} alert-dismissible fade show" role="alert">
         {{ message[1] }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 {% endfor %}
     <div class="container mt-5">
@@ -50,8 +49,17 @@
         </div>
     </div>
 
-    <!-- Add Bootstrap JS -->
+<!-- Add Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybB5ayCmMz8R6trM9/YDt4CyBUj8zvz8b1APeBf0z6zU6gqC7" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script>
+    // Hide flash message after 1 second
+    setTimeout(function(){
+        let alert = document.querySelector('.alert');
+        if(alert){
+            alert.style.display = 'none';
+        }
+    }, 5000);
+</script>
 </body>
 </html>
