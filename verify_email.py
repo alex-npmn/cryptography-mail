@@ -1,7 +1,5 @@
 import email
-import io
 import os
-
 import google
 import google.oauth2.credentials
 import googleapiclient
@@ -13,6 +11,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from flask import redirect, session
 from googleapiclient.discovery import build
+
 
 def fetch_email_by_id(email_id, creds):
     service = build("gmail", "v1", credentials=creds)
@@ -118,34 +117,6 @@ def save_attachment(email_message, attachment_id):
                 f.write(file_data)
             return os.path.abspath(filename)
     return None
-# def verify_email_signature_by_id(email_id, attachment_id):
-#     # Fetch email by email_id
-#     creds = google.oauth2.credentials.Credentials(**session['credentials'])
-#     email_data = fetch_email_by_id(email_id, creds)
-#     email_message = BytesParser().parsebytes(email_data)
-#
-#     # Save the attachment and get its file path
-#     public_key_path = save_attachment(email_message, attachment_id)
-#     print(f'Public key path: {public_key_path}')
-#
-#     if public_key_path is None:
-#         # Handle the case when the attachment is not found
-#         return "Attachment not found"
-#
-#     # Extract the message and signature from the email
-#     message = extract_message(email_message)
-#     signature = extract_signature(email_message)
-#
-#     print(f'Message: {message}')  # Added print
-#     print(f'Signature: {signature}')  # Added print
-#
-#     # Call the verify_signature function with the correct arguments
-#     result = verify_signature(message, signature, public_key_path)
-#
-#     # Remove the public key file after verification
-#     os.remove(public_key_path)
-#
-#     return result
 
 def extract_message(email_message):
     if email_message.is_multipart():

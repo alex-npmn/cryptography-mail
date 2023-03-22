@@ -1,12 +1,19 @@
+import os
+import tempfile
 import google.oauth2.credentials
 from flask import Flask, session, jsonify, flash
 from flask import request, redirect, url_for
-import os
-from auth import get_google_auth_flow, oauth2callback, logout
 from flask_session import Session
+from auth import get_google_auth_flow, oauth2callback, logout
 from send_email import send_encrypted_signed_email
 from verify_email import received_emails, verify_email_signature, get_email, download_attachment_file, \
     verify_signature
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption, PublicFormat
+
+from flask import send_file
+import zipfile
+import io
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -21,10 +28,6 @@ def index():
     is_logged_in = "credentials" in session
     return render_template('index.html', is_logged_in=is_logged_in)
 
-# @app.route('/login')
-# def login():
-#     return render_template('login.html')
-
 @app.route('/authorize')
 def authorize():
     flow = get_google_auth_flow()
@@ -32,13 +35,6 @@ def authorize():
                                                       include_granted_scopes='true')
     session['state'] = state
     return redirect(authorization_url)
-
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption, PublicFormat
-
-from flask import send_file
-import zipfile
-import io
 
 @app.route('/generate_keys', methods=['GET'])
 def generate_keys():
@@ -89,12 +85,11 @@ def view_emails():
 
     creds = google.oauth2.credentials.Credentials(**session['credentials'])
 
-    print(creds)  # Add this line to print the credentials object
+    print(creds)
 
     emails = received_emails(creds)
 
     return render_template('view_emails.html', emails=emails or [])
-
 
 @app.route('/view_email/<email_id>', methods=['GET', 'POST'])
 def view_email(email_id):
@@ -152,28 +147,13 @@ def handle_send_signed_email():
 
     return redirect(url_for("send_email"))
 
-
-
 app.add_url_rule('/authorize', 'authorize', authorize)
 app.add_url_rule('/logout', 'logout', logout)
 app.add_url_rule('/oauth2callback', 'oauth2callback', oauth2callback)
 
-
 @app.route('/received_emails')
 def handle_received_emails():
     return received_emails(session["credentials"])
-
-# @app.route('/verify_email/<email_id>/<attachment_id>', methods=['POST'])
-# def verify_email(email_id, attachment_id):
-#     result = verify_email_signature_by_id(email_id, attachment_id, session["credentials"])
-#     if result:
-#         return jsonify({'status': 'success', 'message': 'Email verified successfully'})
-#     else:
-#         return jsonify({'status': 'error', 'message': 'Email verification failed'})
-
-
-import tempfile
-
 
 @app.route('/verify_email_signature_by_id/<email_id>/<attachment_id>', methods=['GET'])
 def verify_email_signature_by_id(email_id, attachment_id):
@@ -201,7 +181,6 @@ def verify_email_signature_by_id(email_id, attachment_id):
 
     return jsonify(result)
 
-
 @app.route('/download_attachment/<email_id>/<attachment_id>')
 def download_attachment(email_id, attachment_id):
     attachment_file, attachment_filename = download_attachment_file(email_id, attachment_id)
@@ -212,41 +191,6 @@ def download_attachment(email_id, attachment_id):
     return send_file(attachment_file, download_name="test", as_attachment=True)
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
-
-# @app.route('/upload', methods=['GET', 'POST'])
-# def upload_file():
-#     if request.method == 'POST':
-#         # Check if the POST request has the files
-#         if 'private_key' not in request.files or 'public_key' not in request.files:
-#             return redirect(request.url)
-#
-#         private_key_file = request.files['private_key']
-#         public_key_file = request.files['public_key']
-#
-#         if private_key_file.filename == '' or public_key_file.filename == '':
-#             return redirect(request.url)
-#
-#         # Save the uploaded files to the UPLOAD_FOLDER
-#         private_key_path = os.path.join(app.config['UPLOAD_FOLDER'], private_key_file.filename)
-#         public_key_path = os.path.join(app.config['UPLOAD_FOLDER'], public_key_file.filename)
-#
-#         private_key_file.save(private_key_path)
-#         public_key_file.save(public_key_path)
-#
-#         # Call the send_encrypted_signed_email function with the correct paths
-#         send_encrypted_signed_email(from_email, to_email, subject, message, private_key_path, public_key_path)
-#
-#         return 'Files uploaded and email sent successfully'
-#     return '''
-#     <!doctype html>
-#     <title>Upload Private Key and Public Key</title>
-#     <h1>Upload Private Key and Public Key</h1>
-#     <form method=post enctype=multipart/form-data>
-#       <input type=file name=private_key>
-#       <input type=file name=public_key>
-#       <input type=submit value=Upload>
-#     </form>
-#     '''
 
 if __name__ == '__main__':
     app.run(debug=True, port=5003)

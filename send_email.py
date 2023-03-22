@@ -16,7 +16,6 @@ from auth import dict_to_creds
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-
 def sign_message(message, private_key_path):
     with open(private_key_path, "rb") as key_file:
         private_key = serialization.load_pem_private_key(

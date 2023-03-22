@@ -6,12 +6,11 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from flask import session
-
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 def send_signed_email(from_email, to_email, subject, message, private_key_path, recipient_public_key_pem):
     msg = MIMEMultipart()
@@ -70,9 +69,6 @@ def retrieve_emails(email_address, password, mailbox='INBOX', limit=10):
                 emails.append(msg)
 
     return emails
-
-
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 def encrypt_message(message, public_key_pem):
     public_key = load_pem_public_key(public_key_pem.encode(), backend=default_backend())
